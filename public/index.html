@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1A1410">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>衣櫥管家</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F5F0E8;
+  --warm-white: #FDFAF5;
+  --ink: #1A1410;
+  --ink-light: #4A3F35;
+  --rust: #C4622D;
+  --rust-light: #E8845A;
+  --sage: #7A9E7E;
+  --sand: #D4B896;
+  --sand-light: #EDD9C0;
+  --winter: #4A6FA5;
+  --summer: #E07B39;
+  --border: #D4C8B8;
+  --shadow: rgba(26,20,16,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Serif TC', serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+header {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+.logo { font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: 0.04em; }
+.logo span { color: var(--rust-light); }
+.header-stats { display: flex; gap: 14px; font-size: 11px; color: var(--sand); text-align: center; }
+.header-stat strong { color: var(--cream); font-size: 15px; display: block; line-height: 1.2; }
+
+/* ── Nav ── */
+.nav-tabs {
+  background: var(--warm-white);
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  color: var(--ink-light);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tab-btn.active { color: var(--ink); border-bottom-color: var(--rust); font-weight: 600; }
+.tab-count {
+  background: var(--sand-light);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.tab-btn.active .tab-count { background: var(--rust); color: white; }
+
+/* ── Main ── */
+main { padding: 16px; max-width: 900px; margin: 0 auto; padding-bottom: 80px; }
+
+/* ── Camera Card ── */
+.camera-card {
+  background: var(--warm-white);
+  border: 2px dashed var(--sand);
+  border-radius: 16px;
+  padding: 22px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.camera-card:hover { border-color: var(--rust); }
+.camera-title { font-family: 'DM Serif Display', serif; font-size: 19px; margin-bottom: 4px; }
+.camera-sub { font-size: 12px; color: var(--ink-light); margin-bottom: 16px; line-height: 1.6; }
+
+.camera-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s;
+  font-weight: 600;
+  -webkit-appearance: none;
+}
+.btn-primary { background: var(--rust); color: white; box-shadow: 0 3px 10px rgba(196,98,45,0.3); }
+.btn-primary:hover { background: #B0561F; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary { background: var(--ink); color: var(--cream); }
+.btn-secondary:hover { background: var(--ink-light); }
+.btn-outline { background: transparent; color: var(--ink); border: 2px solid var(--border); }
+.btn-outline:hover { border-color: var(--rust); color: var(--rust); }
+
+#cameraPreview {
+  display: none;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  object-fit: cover;
+  margin: 0 auto 14px;
+  border: 3px solid var(--rust);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+#capturedPreview {
+  display: none;
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  object-fit: cover;
+  margin: 0 auto 14px;
+  border: 3px solid var(--sage);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+.analyzing-bar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin: 12px auto;
+  max-width: 320px;
+}
+.analyzing-bar.show { display: flex; }
+.spinner {
+  width: 17px; height: 17px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.ai-result {
+  display: none;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px auto;
+  max-width: 340px;
+  text-align: left;
+}
+.ai-result.show { display: block; animation: fadeUp 0.3s ease; }
+.ai-label { font-size: 10px; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.ai-category { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ai-confidence { font-size: 11px; color: var(--ink-light); }
+.ai-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: white;
+}
+.badge-winter-top { background: var(--winter); }
+.badge-summer-top { background: var(--summer); }
+.badge-winter-bottom { background: #3A5A8A; }
+.badge-summer-bottom { background: #C06828; }
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (min-width: 540px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.stat-card {
+  background: var(--warm-white);
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s;
+}
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+.stat-card.winter-top::after { background: var(--winter); }
+.stat-card.summer-top::after { background: var(--summer); }
+.stat-card.winter-bottom::after { background: #3A5A8A; }
+.stat-card.summer-bottom::after { background: #C06828; }
+.stat-icon { font-size: 20px; margin-bottom: 5px; }
+.stat-label { font-size: 11px; color: var(--ink-light); margin-bottom: 2px; }
+.stat-num { font-family: 'DM Serif Display', serif; font-size: 30px; color: var(--ink); line-height: 1; }
+.stat-unit { font-size: 11px; color: var(--ink-light); }
+
+/* ── Filter ── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--warm-white);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Noto Serif TC', serif;
+  color: var(--ink-light);
+}
+.filter-chip.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.add-btn-float {
+  margin-left: auto;
+  background: var(--rust);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  transition: all 0.18s;
+}
+.add-btn-float:hover { background: #B0561F; }
+
+/* ── Grid ── */
+.clothes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+@media (min-width: 480px) { .clothes-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); } }
+
+.cloth-card {
+  background: var(--warm-white);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+  position: relative;
+  animation: cardIn 0.3s ease both;
+}
+.cloth-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px var(--shadow); }
+.cloth-card:active { transform: scale(0.98); }
+
+.cloth-photo {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+}
+.cloth-placeholder {
+  width: 100%;
+  aspect-ratio: 3/4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+}
+.cloth-body { padding: 9px 11px 11px; }
+.cloth-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cloth-meta { font-size: 10px; color: var(--ink-light); margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cloth-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.cloth-tag { font-size: 9px; padding: 2px 6px; border-radius: 999px; font-weight: 700; color: white; }
+.tag-winter-top { background: var(--winter); }
+.tag-summer-top { background: var(--summer); }
+.tag-winter-bottom { background: #3A5A8A; }
+.tag-summer-bottom { background: #C06828; }
+
+.cloth-actions {
+  position: absolute;
+  top: 7px; right: 7px;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.cloth-card:hover .cloth-actions { opacity: 1; }
+.action-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 2px 6px var(--shadow);
+  transition: all 0.15s;
+}
+.action-icon:hover { transform: scale(1.1); background: #ffeeee; }
+
+/* ── Empty ── */
+.empty-state { text-align: center; padding: 50px 20px; color: var(--ink-light); }
+.empty-state .ei { font-size: 52px; margin-bottom: 14px; opacity: 0.45; }
+.empty-state h3 { font-size: 17px; margin-bottom: 7px; color: var(--ink); }
+.empty-state p { font-size: 13px; line-height: 1.7; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(26,20,16,0.6);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+@media (min-width: 600px) { .modal-overlay { align-items: center; } }
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--warm-white);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.28s ease;
+}
+@media (min-width: 600px) {
+  .modal { border-radius: 16px; animation: modalIn 0.25s ease; }
+}
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 999px;
+  margin: 0 auto 18px;
+}
+@media (min-width: 600px) { .modal-handle { display: none; } }
+
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 21px; margin-bottom: 18px; }
+
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--ink-light); letter-spacing: 0.05em; }
+.form-input {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 14px;
+  background: var(--cream);
+  color: var(--ink);
+  transition: border-color 0.18s;
+  outline: none;
+  -webkit-appearance: none;
+}
+.form-input:focus { border-color: var(--rust); }
+
+.photo-tap-area {
+  width: 90px; height: 90px;
+  border-radius: 10px;
+  border: 2px dashed var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  background: var(--cream);
+  overflow: hidden;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+.photo-tap-area:hover { border-color: var(--rust); }
+.photo-tap-area img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+.category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.category-option {
+  padding: 11px 8px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.18s;
+  background: var(--cream);
+}
+.category-option .cat-icon { font-size: 22px; margin-bottom: 3px; }
+.category-option .cat-label { font-size: 12px; font-weight: 600; }
+.category-option.selected { color: white; border-color: transparent; }
+.category-option.selected.winter-top { background: var(--winter); }
+.category-option.selected.summer-top { background: var(--summer); }
+.category-option.selected.winter-bottom { background: #3A5A8A; }
+.category-option.selected.summer-bottom { background: #C06828; }
+
+.color-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.color-dot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.color-dot.selected { border-color: var(--ink); transform: scale(1.18); }
+
+.modal-footer { display: flex; gap: 10px; margin-top: 18px; }
+.modal-footer .btn { flex: 1; justify-content: center; }
+
+/* ── Season chart card ── */
+.chart-card {
+  background: var(--warm-white);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; font-family: 'DM Serif Display', serif; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 11px 22px;
+  border-radius: 999px;
+  font-size: 13px;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── Animations ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes cardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+.panel { display: none; }
+.panel.active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">衣<span>櫥</span>管家</div>
+  <div class="header-stats">
+    <div class="header-stat"><strong id="totalCount">0</strong>總計</div>
+    <div class="header-stat"><strong id="winterTotal">0</strong>冬季</div>
+    <div class="header-stat"><strong id="summerTotal">0</strong>夏季</div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('all',this)">🗂 全部 <span class="tab-count" id="cnt-all">0</span></button>
+  <button class="tab-btn" onclick="switchTab('winter-top',this)">🧥 冬衣 <span class="tab-count" id="cnt-winter-top">0</span></button>
+  <button class="tab-btn" onclick="switchTab('summer-top',this)">👕 夏衣 <span class="tab-count" id="cnt-summer-top">0</span></button>
+  <button class="tab-btn" onclick="switchTab('winter-bottom',this)">🥾 冬褲 <span class="tab-count" id="cnt-winter-bottom">0</span></button>
+  <button class="tab-btn" onclick="switchTab('summer-bottom',this)">🩳 夏褲 <span class="tab-count" id="cnt-summer-bottom">0</span></button>
+  <button class="tab-btn" onclick="switchTab('stats',this)">📊 統計</button>
+</nav>
+
+<main>
+  <!-- Camera / AI section -->
+  <div class="camera-card" id="cameraSection">
+    <div class="camera-title">📸 AI 智能識別</div>
+    <div class="camera-sub">拍照或上傳衣物照片，AI 自動識別冬衣／夏衣／冬褲／夏褲</div>
+    <video id="cameraPreview" autoplay playsinline muted></video>
+    <img id="capturedPreview" alt="預覽">
+    <div class="analyzing-bar" id="analyzingBar">
+      <div class="spinner"></div>
+      <span id="analyzingText">AI 分析衣物中…</span>
+    </div>
+    <div class="ai-result" id="aiResult">
+      <div class="ai-label">AI 識別結果</div>
+      <div class="ai-category" id="aiCategory"></div>
+      <div class="ai-confidence" id="aiConfidence"></div>
+    </div>
+    <div class="camera-buttons" id="camBtns">
+      <button class="btn btn-primary" onclick="startCamera()">📷 開啟相機</button>
+      <label class="btn btn-secondary" style="cursor:pointer">
+        🖼 上傳照片
+        <input type="file" accept="image/*" style="display:none" onchange="handleUpload(event)">
+      </label>
+      <button class="btn btn-outline" onclick="openAddModal()">➕ 手動新增</button>
+    </div>
+    <div class="camera-buttons" id="liveBtns" style="display:none">
+      <button class="btn btn-primary" onclick="capturePhoto()">📸 拍照</button>
+      <button class="btn btn-outline" onclick="stopCamera()">✕ 取消</button>
+    </div>
+    <div class="camera-buttons" id="afterBtns" style="display:none">
+      <button class="btn btn-primary" onclick="saveAiItem()">✓ 儲存到衣櫥</button>
+      <button class="btn btn-outline" onclick="retakePhoto()">重拍</button>
+    </div>
+  </div>
+
+  <!-- Stats panel -->
+  <div id="panel-stats" class="panel">
+    <div class="stats-grid">
+      <div class="stat-card winter-top"><div class="stat-icon">🧥</div><div class="stat-label">冬衣</div><div class="stat-num" id="stat-winter-top">0</div><div class="stat-unit">件</div></div>
+      <div class="stat-card summer-top"><div class="stat-icon">👕</div><div class="stat-label">夏衣</div><div class="stat-num" id="stat-summer-top">0</div><div class="stat-unit">件</div></div>
+      <div class="stat-card winter-bottom"><div class="stat-icon">🥾</div><div class="stat-label">冬褲</div><div class="stat-num" id="stat-winter-bottom">0</div><div class="stat-unit">件</div></div>
+      <div class="stat-card summer-bottom"><div class="stat-icon">🩳</div><div class="stat-label">夏褲</div><div class="stat-num" id="stat-summer-bottom">0</div><div class="stat-unit">件</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">季節分配</div>
+      <div id="seasonBar" style="height:26px;border-radius:999px;overflow:hidden;display:flex;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--ink-light);">
+        <span>🔵 冬季</span><span>🟠 夏季</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">顏色分布</div>
+      <div id="colorStats" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- Clothes container -->
+  <div id="clothesContainer">
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="setSort('newest',this)">最新</button>
+      <button class="filter-chip" onclick="setSort('oldest',this)">最舊</button>
+      <button class="filter-chip" onclick="setSort('name',this)">名稱</button>
+      <button class="add-btn-float" onclick="openAddModal()">➕ 新增</button>
+    </div>
+    <div class="clothes-grid" id="clothesGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="ei">👗</div>
+      <h3>這裡還沒有衣服</h3>
+      <p>拍照讓 AI 自動識別<br>或點擊「新增」手動添加</p>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="addModal" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">新增衣物</div>
+
+    <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;">
+      <div class="photo-tap-area" onclick="document.getElementById('mPhoto').click()">
+        <img id="mPhotoImg" src="" style="display:none" alt="">
+        <span id="mPhotoIcon">📷</span>
+      </div>
+      <input type="file" id="mPhoto" accept="image/*" style="display:none" onchange="handleModalPhoto(event)">
+      <div style="flex:1;min-width:0;">
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label">名稱 *</label>
+          <input class="form-input" id="mName" placeholder="例：黑色羽絨衣">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">備註</label>
+          <input class="form-input" id="mNote" placeholder="品牌、購入年份…">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">類別 *</label>
+      <div class="category-grid">
+        <div class="category-option winter-top" onclick="selectCat('winter-top',this)"><div class="cat-icon">🧥</div><div class="cat-label">冬衣</div></div>
+        <div class="category-option summer-top" onclick="selectCat('summer-top',this)"><div class="cat-icon">👕</div><div class="cat-label">夏衣</div></div>
+        <div class="category-option winter-bottom" onclick="selectCat('winter-bottom',this)"><div class="cat-icon">🥾</div><div class="cat-label">冬褲</div></div>
+        <div class="category-option summer-bottom" onclick="selectCat('summer-bottom',this)"><div class="cat-icon">🩳</div><div class="cat-label">夏褲</div></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">顏色</label>
+      <div class="color-row" id="colorRow"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveItem()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Constants ──
+const COLORS = [
+  {name:'黑色',hex:'#1A1410'},{name:'白色',hex:'#F0EDE8',border:true},
+  {name:'灰色',hex:'#8A8A8A'},{name:'藍色',hex:'#4A6FA5'},
+  {name:'紅色',hex:'#C4622D'},{name:'綠色',hex:'#6A9E6E'},
+  {name:'米色',hex:'#D4B896'},{name:'粉色',hex:'#E8A0B4'},
+  {name:'黃色',hex:'#D4A83A'},{name:'紫色',hex:'#8A6FA5'},
+];
+const CAT = {
+  'winter-top':    {label:'冬衣',icon:'🧥',cls:'tag-winter-top'},
+  'summer-top':    {label:'夏衣',icon:'👕',cls:'tag-summer-top'},
+  'winter-bottom': {label:'冬褲',icon:'🥾',cls:'tag-winter-bottom'},
+  'summer-bottom': {label:'夏褲',icon:'🩳',cls:'tag-summer-bottom'},
+};
+
+// ── State ──
+let clothes = JSON.parse(localStorage.getItem('wardrobe_v3') || '[]');
+let editingId = null, selCat = null, selColor = null;
+let currentFilter = 'all', currentSort = 'newest';
+let cameraStream = null, capturedImg = null, aiCat = null, modalPhoto = null;
+
+const save = () => localStorage.setItem('wardrobe_v3', JSON.stringify(clothes));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+
+// ── Render ──
+function render() {
+  // counts
+  ['winter-top','summer-top','winter-bottom','summer-bottom'].forEach(c => {
+    document.getElementById('cnt-'+c).textContent = clothes.filter(x=>x.category===c).length;
+  });
+  const total = clothes.length;
+  document.getElementById('cnt-all').textContent = total;
+  document.getElementById('totalCount').textContent = total;
+  const wt = clothes.filter(x=>x.category.startsWith('winter')).length;
+  document.getElementById('winterTotal').textContent = wt;
+  document.getElementById('summerTotal').textContent = total - wt;
+
+  renderGrid();
+  renderStats();
+}
+
+function renderGrid() {
+  const list = (currentFilter==='all' ? [...clothes] : clothes.filter(x=>x.category===currentFilter));
+  if (currentSort==='newest') list.sort((a,b)=>b.ts-a.ts);
+  else if (currentSort==='oldest') list.sort((a,b)=>a.ts-b.ts);
+  else list.sort((a,b)=>a.name.localeCompare(b.name,'zh-TW'));
+
+  const grid = document.getElementById('clothesGrid');
+  const empty = document.getElementById('emptyState');
+  if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+
+  grid.innerHTML = list.map((item,i) => {
+    const m = CAT[item.category];
+    const col = COLORS.find(c=>c.name===item.color);
+    const photoEl = item.photo
+      ? `<img class="cloth-photo" src="${item.photo}" alt="${item.name}" loading="lazy">`
+      : `<div class="cloth-placeholder" style="background:${col?.hex||'#D4B896'}22">${m.icon}</div>`;
+    return `<div class="cloth-card" style="animation-delay:${(i%10)*35}ms" onclick="openEditModal('${item.id}')">
+      ${photoEl}
+      <div class="cloth-body">
+        <div class="cloth-name">${item.name}</div>
+        <div class="cloth-meta">${item.note||'—'}</div>
+        <div class="cloth-tags">
+          <span class="cloth-tag ${m.cls}">${m.label}</span>
+          ${item.color?`<span class="cloth-tag" style="background:${col?.hex||'#999'}">${item.color}</span>`:''}
+        </div>
+      </div>
+      <div class="cloth-actions">
+        <button class="action-icon" onclick="event.stopPropagation();deleteItem('${item.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStats() {
+  ['winter-top','summer-top','winter-bottom','summer-bottom'].forEach(c=>{
+    document.getElementById('stat-'+c).textContent = clothes.filter(x=>x.category===c).length;
+  });
+  const total = clothes.length||1;
+  const w = clothes.filter(x=>x.category.startsWith('winter')).length;
+  const s = clothes.length - w;
+  const wp = Math.round(w/total*100), sp = 100-wp;
+  document.getElementById('seasonBar').innerHTML =
+    `<div style="width:${wp}%;background:var(--winter);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">${wp>12?wp+'%':''}</div>
+     <div style="width:${sp}%;background:var(--summer);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">${sp>12?sp+'%':''}</div>`;
+
+  const cc = {};
+  clothes.forEach(c=>{if(c.color)cc[c.color]=(cc[c.color]||0)+1;});
+  const sorted = Object.entries(cc).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('colorStats').innerHTML = sorted.length
+    ? sorted.map(([name,cnt])=>{
+        const c=COLORS.find(x=>x.name===name);
+        const pct=Math.round(cnt/clothes.length*100);
+        return `<div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:13px;height:13px;border-radius:50%;background:${c?.hex||'#999'};border:1px solid var(--border);flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>${name}</span><span>${cnt}件</span></div>
+            <div style="height:5px;background:var(--cream);border-radius:999px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${c?.hex||'#999'};transition:width 0.6s;"></div></div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="font-size:12px;color:var(--ink-light);">尚無數據</div>';
+}
+
+// ── Tab ──
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const stats = document.getElementById('panel-stats');
+  const cont = document.getElementById('clothesContainer');
+  if (tab==='stats') {
+    cont.style.display='none'; stats.classList.add('active'); renderStats();
+  } else {
+    stats.classList.remove('active'); cont.style.display='block';
+    currentFilter=tab; renderGrid();
+  }
+}
+function setSort(s,btn) {
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentSort=s; renderGrid();
+}
+
+// ── Camera ──
+async function startCamera() {
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:960}}});
+    const v=document.getElementById('cameraPreview');
+    v.srcObject=cameraStream; v.style.display='block';
+    document.getElementById('camBtns').style.display='none';
+    document.getElementById('liveBtns').style.display='flex';
+    document.getElementById('aiResult').classList.remove('show');
+    document.getElementById('capturedPreview').style.display='none';
+  } catch(e) { showToast('無法開啟相機，請使用上傳照片'); }
+}
+
+function stopCamera() {
+  if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+  document.getElementById('cameraPreview').style.display='none';
+  document.getElementById('camBtns').style.display='flex';
+  document.getElementById('liveBtns').style.display='none';
+}
+
+function capturePhoto() {
+  const v=document.getElementById('cameraPreview');
+  const c=document.createElement('canvas');
+  c.width=v.videoWidth; c.height=v.videoHeight;
+  c.getContext('2d').drawImage(v,0,0);
+  capturedImg=c.toDataURL('image/jpeg',0.82);
+  stopCamera();
+  const p=document.getElementById('capturedPreview');
+  p.src=capturedImg; p.style.display='block';
+  document.getElementById('camBtns').style.display='none';
+  document.getElementById('afterBtns').style.display='flex';
+  analyzeImage();
+}
+
+function handleUpload(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    capturedImg=ev.target.result;
+    const p=document.getElementById('capturedPreview');
+    p.src=capturedImg; p.style.display='block';
+    document.getElementById('camBtns').style.display='none';
+    document.getElementById('afterBtns').style.display='flex';
+    analyzeImage();
+  };
+  r.readAsDataURL(file); e.target.value='';
+}
+
+async function analyzeImage() {
+  document.getElementById('analyzingBar').classList.add('show');
+  document.getElementById('aiResult').classList.remove('show');
+  aiCat=null;
+  try {
+    const base64=capturedImg.split(',')[1];
+    const mime=(capturedImg.match(/data:([^;]+);/)||[])[1]||'image/jpeg';
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:300,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:base64}},
+          {type:'text',text:`分析這件衣物，只回覆JSON（無其他文字）：
+{"category":"winter-top|summer-top|winter-bottom|summer-bottom","confidence":"高|中|低","reason":"一句話","suggestedName":"建議名稱","suggestedColor":"黑色|白色|灰色|藍色|紅色|綠色|米色|粉色|黃色|紫色"}
+winter-top=冬衣(毛衣/羽絨衣/外套) summer-top=夏衣(T恤/短袖/背心) winter-bottom=冬褲(厚長褲) summer-bottom=夏褲(短褲/薄褲)`}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    const txt=data.content?.find(b=>b.type==='text')?.text||'';
+    const m=txt.match(/\{[\s\S]*?\}/);
+    if(m){
+      const r=JSON.parse(m[0]);
+      aiCat=r.category;
+      const meta=CAT[r.category];
+      document.getElementById('aiCategory').innerHTML=`<span class="ai-badge badge-${r.category}">${meta.icon} ${meta.label}</span>`;
+      document.getElementById('aiConfidence').textContent=`信心度：${r.confidence} · ${r.reason}`;
+      document.getElementById('aiResult')._name=r.suggestedName||'';
+      document.getElementById('aiResult')._color=r.suggestedColor||'';
+    } else throw new Error();
+  } catch(e) {
+    document.getElementById('aiCategory').innerHTML='⚠️ 識別失敗';
+    document.getElementById('aiConfidence').textContent='請手動選擇類別';
+  }
+  document.getElementById('analyzingBar').classList.remove('show');
+  document.getElementById('aiResult').classList.add('show');
+}
+
+function saveAiItem() {
+  const el=document.getElementById('aiResult');
+  selCat=aiCat; modalPhoto=capturedImg;
+  openAddModal(el._name||'',el._color||'');
+}
+
+function retakePhoto() {
+  capturedImg=null; aiCat=null;
+  document.getElementById('capturedPreview').style.display='none';
+  document.getElementById('afterBtns').style.display='none';
+  document.getElementById('aiResult').classList.remove('show');
+  document.getElementById('analyzingBar').classList.remove('show');
+  document.getElementById('camBtns').style.display='flex';
+}
+
+// ── Modal ──
+function openAddModal(name='',color='') {
+  editingId=null;
+  modalPhoto=modalPhoto||capturedImg||null;
+  if(!selCat) selCat=null;
+  document.getElementById('modalTitle').textContent='新增衣物';
+  document.getElementById('mName').value=name;
+  document.getElementById('mNote').value='';
+  document.querySelectorAll('.category-option').forEach(o=>o.classList.remove('selected'));
+  if(selCat) document.querySelector(`.category-option.${selCat}`)?.classList.add('selected');
+  selColor=color;
+  renderColorRow(color);
+  renderModalPhoto();
+  document.getElementById('addModal').classList.add('show');
+}
+
+function openEditModal(id) {
+  const item=clothes.find(x=>x.id===id); if(!item) return;
+  editingId=id; selCat=item.category; selColor=item.color; modalPhoto=item.photo||null;
+  document.getElementById('modalTitle').textContent='編輯衣物';
+  document.getElementById('mName').value=item.name;
+  document.getElementById('mNote').value=item.note||'';
+  document.querySelectorAll('.category-option').forEach(o=>o.classList.remove('selected'));
+  document.querySelector(`.category-option.${item.category}`)?.classList.add('selected');
+  renderColorRow(item.color);
+  renderModalPhoto();
+  document.getElementById('addModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('addModal').classList.remove('show');
+  editingId=null; selCat=null; selColor=null; modalPhoto=null;
+}
+
+function handleOverlayClick(e) {
+  if(e.target===document.getElementById('addModal')) closeModal();
+}
+
+function renderModalPhoto() {
+  const img=document.getElementById('mPhotoImg'), icon=document.getElementById('mPhotoIcon');
+  if(modalPhoto){img.src=modalPhoto;img.style.display='block';icon.style.display='none';}
+  else{img.style.display='none';icon.style.display='';}
+}
+
+function handleModalPhoto(e) {
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{modalPhoto=ev.target.result;renderModalPhoto();};
+  r.readAsDataURL(f); e.target.value='';
+}
+
+function renderColorRow(sel='') {
+  document.getElementById('colorRow').innerHTML=COLORS.map(c=>`
+    <div class="color-dot${c.name===sel?' selected':''}"
+      style="background:${c.hex};${c.border?'border-color:#bbb;':''}"
+      title="${c.name}"
+      onclick="selectColor('${c.name}',this)"></div>`).join('');
+}
+
+function selectCat(cat,el) {
+  selCat=cat;
+  document.querySelectorAll('.category-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectColor(name,el) {
+  selColor=name;
+  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveItem() {
+  const name=document.getElementById('mName').value.trim();
+  if(!name){showToast('請輸入名稱');return;}
+  if(!selCat){showToast('請選擇類別');return;}
+  if(editingId){
+    const item=clothes.find(x=>x.id===editingId);
+    if(item){
+      item.name=name; item.note=document.getElementById('mNote').value.trim();
+      item.category=selCat; item.color=selColor||'';
+      if(modalPhoto) item.photo=modalPhoto;
+    }
+    showToast('已更新 ✓');
+  } else {
+    clothes.unshift({id:uid(),name,note:document.getElementById('mNote').value.trim(),
+      category:selCat,color:selColor||'',photo:modalPhoto||null,ts:Date.now()});
+    showToast('已新增 ✓');
+  }
+  save(); render(); closeModal();
+  // reset camera
+  capturedImg=null; aiCat=null;
+  document.getElementById('capturedPreview').style.display='none';
+  document.getElementById('afterBtns').style.display='none';
+  document.getElementById('aiResult').classList.remove('show');
+  document.getElementById('camBtns').style.display='flex';
+}
+
+function deleteItem(id) {
+  if(!confirm('確定刪除這件衣物？')) return;
+  clothes=clothes.filter(x=>x.id!==id); save(); render(); showToast('已刪除');
+}
+
+// ── Toast ──
+let toastT;
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── Init ──
+if(!clothes.length) {
+  clothes=[
+    {id:uid(),name:'黑色羽絨外套',note:'Uniqlo',category:'winter-top',color:'黑色',photo:null,ts:Date.now()-1e4},
+    {id:uid(),name:'白色短袖T恤',note:'',category:'summer-top',color:'白色',photo:null,ts:Date.now()-2e4},
+    {id:uid(),name:'深藍牛仔長褲',note:'Levis 501',category:'winter-bottom',color:'藍色',photo:null,ts:Date.now()-3e4},
+    {id:uid(),name:'米色休閒短褲',note:'夏天必備',category:'summer-bottom',color:'米色',photo:null,ts:Date.now()-4e4},
+    {id:uid(),name:'灰色針織毛衣',note:'',category:'winter-top',color:'灰色',photo:null,ts:Date.now()-5e4},
+  ];
+  save();
+}
+render();
+</script>
+</body>
+</html>
